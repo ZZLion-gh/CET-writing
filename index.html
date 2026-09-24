@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CET-4 Writing · 高频表达与替换训练</title>
+  <style>
+    :root {
+      --ink: #243047;
+      --muted: #718096;
+      --paper: #fffdf9;
+      --cream: #f7f0e7;
+      --navy: #283b65;
+      --pink: #e9588d;
+      --pink-soft: #fff0f5;
+      --green: #21866f;
+      --line: #eadfd5;
+      --shadow: 0 16px 42px rgba(64, 47, 38, .1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(233, 88, 141, .10), transparent 28rem),
+        linear-gradient(135deg, #f7f0e7 0%, #f3eee9 50%, #edf1f8 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+
+    .page { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 52px 0 72px; }
+    .hero { display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: end; margin-bottom: 26px; }
+    .eyebrow { color: var(--pink); font-size: .82rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 9px 0 10px; color: var(--navy); font-family: Georgia, "Songti SC", serif; font-size: clamp(2rem, 5vw, 4rem); line-height: 1.05; }
+    .lead { margin: 0; max-width: 720px; color: #5f6b80; font-size: 1.03rem; line-height: 1.75; }
+    .score-pill { min-width: 154px; padding: 16px 20px; border: 1px solid rgba(40, 59, 101, .12); border-radius: 18px; background: rgba(255,255,255,.62); text-align: center; backdrop-filter: blur(10px); }
+    .score-pill strong { display: block; color: var(--navy); font-size: 1.55rem; }
+    .score-pill span { color: var(--muted); font-size: .83rem; }
+
+    .card { margin-top: 22px; padding: clamp(22px, 4vw, 38px); border: 1px solid rgba(40,59,101,.10); border-radius: 28px; background: rgba(255,253,249,.94); box-shadow: var(--shadow); }
+    .section-head { display: flex; gap: 18px; justify-content: space-between; align-items: start; margin-bottom: 24px; }
+    .section-tag { margin-bottom: 7px; color: var(--pink); font-weight: 800; font-size: .78rem; letter-spacing: .12em; }
+    h2 { margin: 0; color: var(--navy); font-family: Georgia, "Songti SC", serif; font-size: clamp(1.45rem, 3vw, 2.25rem); }
+    .instruction { margin: 8px 0 0; color: var(--muted); line-height: 1.65; }
+    .progress { flex: 0 0 auto; padding: 8px 13px; border-radius: 999px; color: var(--navy); background: #edf1f8; font-weight: 750; font-size: .88rem; }
+
+    .match-board { position: relative; display: grid; grid-template-columns: minmax(210px, .82fr) minmax(330px, 1.35fr); gap: clamp(34px, 8vw, 112px); }
+    .column { position: relative; z-index: 2; display: grid; gap: 10px; align-content: start; }
+    .column-title { margin: 0 0 2px; color: var(--muted); font-size: .75rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+    .match-item {
+      width: 100%; min-height: 54px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px;
+      background: #fff; box-shadow: 0 5px 14px rgba(54, 47, 44, .045); cursor: pointer; text-align: left;
+      transition: border-color .18s, background .18s, color .18s, transform .18s, box-shadow .18s;
+    }
+    .match-item:hover:not(:disabled), .match-item:focus-visible { border-color: #cfb7c1; transform: translateY(-1px); box-shadow: 0 8px 18px rgba(54,47,44,.08); outline: none; }
+    .match-item.selected { border-color: var(--navy); background: #eef2fb; box-shadow: 0 0 0 3px rgba(40,59,101,.10); }
+    .match-item.matched { border-color: #f0afc7; background: var(--pink-soft); }
+    .match-item.expression.matched { color: var(--pink); font-weight: 800; }
+    .match-item:disabled { cursor: default; opacity: 1; }
+    .match-item.wrong { animation: shake .26s linear; border-color: #dc6f6f; background: #fff4f4; }
+    @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    #lines { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+    #lines path { fill: none; stroke: rgba(233,88,141,.68); stroke-width: 2.4; stroke-linecap: round; }
+    #match-message { min-height: 25px; margin: 16px 0 0; color: var(--muted); text-align: center; font-weight: 700; }
+
+    .practice-list { display: grid; gap: 16px; }
+    .question { padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: #fff; transition: border-color .2s, background .2s; }
+    .question.correct { border-color: #f0afc7; background: linear-gradient(100deg, #fff, var(--pink-soft)); }
+    .q-top { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
+    .q-number { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: #fff; background: var(--navy); font-weight: 800; font-size: .85rem; }
+    .question.correct .q-number { background: var(--pink); }
+    .target { color: var(--pink); font-weight: 800; }
+    .source { margin: 0 0 13px; padding-left: 41px; color: #43516a; font-family: Georgia, "Times New Roman", serif; font-size: 1.04rem; line-height: 1.55; }
+    .answer-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding-left: 41px; }
+    .answer {
+      min-width: 0; padding: 12px 14px; border: 1px solid #d9dfe8; border-radius: 12px; color: var(--ink); background: #fbfcfe; outline: none;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .answer:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(40,59,101,.10); }
+    .answer[disabled] { color: var(--green); background: #f5fffb; font-weight: 700; }
+    .check { border: 0; border-radius: 12px; padding: 0 18px; color: #fff; background: var(--navy); cursor: pointer; font-weight: 750; }
+    .check:hover:not(:disabled) { background: #192c55; }
+    .check:disabled { background: var(--green); cursor: default; }
+    .feedback { min-height: 20px; margin: 8px 0 0; padding-left: 41px; color: var(--muted); font-size: .88rem; line-height: 1.55; }
+    .feedback p { margin: 4px 0; }
+    .feedback .bad { color: #b84f58; }
+    .feedback .good { color: var(--green); font-weight: 750; }
+    .reference { margin-top: 9px !important; padding: 10px 12px; border-left: 3px solid var(--pink); border-radius: 0 9px 9px 0; color: #48556d; background: var(--pink-soft); }
+    .reference strong { color: var(--pink); }
+
+    .actions { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 22px; }
+    .reset { padding: 10px 15px; border: 1px solid #d8dfea; border-radius: 12px; background: #fff; cursor: pointer; color: var(--muted); }
+    .reset:hover { color: var(--navy); border-color: var(--navy); }
+    .complete { margin: 0; color: var(--green); font-weight: 800; text-align: right; }
+    footer { margin-top: 22px; color: #778297; text-align: center; font-size: .82rem; }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 20px, 680px); padding-top: 30px; }
+      .hero { grid-template-columns: 1fr; align-items: start; }
+      .score-pill { width: fit-content; }
+      .card { padding: 20px 14px; border-radius: 22px; }
+      .section-head { align-items: center; }
+      .match-board { grid-template-columns: minmax(112px, .75fr) minmax(170px, 1.25fr); gap: 22px; }
+      .match-item { min-height: 62px; padding: 8px 9px; font-size: .82rem; }
+      .source, .answer-row, .feedback { padding-left: 0; }
+      .answer-row { grid-template-columns: 1fr; }
+      .check { min-height: 43px; }
+      .actions { align-items: flex-start; flex-direction: column; }
+      .complete { text-align: left; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <div class="eyebrow">CET-4 Writing Lab</div>
+        <h1>从功能到表达</h1>
+        <p class="lead">先识别句子的写作任务，再迁移熟悉的表达框架。完成 20 组连线和 6 句替换，即完成本次专项练习。</p>
+      </div>
+      <div class="score-pill" aria-live="polite"><strong id="total-score">0 / 26</strong><span>已完成</span></div>
+    </header>
+
+    <section class="card" aria-labelledby="matching-title">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">PART 01 · MATCHING</div>
+          <h2 id="matching-title">高频写作功能表达连线</h2>
+          <p class="instruction">先点左侧写作功能，再点右侧对应英文表达。匹配成功后，英文表达会变成粉红色。</p>
+        </div>
+        <div class="progress" id="match-progress">0 / 20</div>
+      </div>
+      <div class="match-board" id="match-board">
+        <svg id="lines" aria-hidden="true"></svg>
+        <div class="column" id="functions"><p class="column-title">写作功能</p></div>
+        <div class="column" id="expressions"><p class="column-title">English expressions</p></div>
+      </div>
+      <p id="match-message" aria-live="polite">请选择左侧一项开始。</p>
+      <div class="actions"><button class="reset" id="reset-match" type="button">重新连线</button></div>
+    </section>
+
+    <section class="card" aria-labelledby="substitution-title">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">PART 02 · SUBSTITUTION</div>
+          <h2 id="substitution-title">替换训练</h2>
+          <p class="instruction">保留原句的功能框架，替换成指定主题并写出完整句子即可通过。基础语法问题会作为提示，不影响完成；提交后可查看参考替换句。</p>
+        </div>
+        <div class="progress" id="sentence-progress">0 / 6</div>
+      </div>
+      <div class="practice-list" id="practice-list"></div>
+      <div class="actions">
+        <button class="reset" id="reset-sentences" type="button">清空答案</button>
+        <p class="complete" id="complete-message" aria-live="polite"></p>
+      </div>
+    </section>
+    <footer>结构不变，替换内容；先完成表达功能，再追求语言丰富。</footer>
+  </main>
+
+  <script>
+    const pairs = [
+      ["引出时代背景", "With the rapid advancement of..."],
+      ["引出现象", "An increasing number of students..."],
+      ["强调重要性", "...has become increasingly important."],
+      ["描述变化", "...is increasingly integrated into..."],
+      ["表明个人观点", "From my perspective, ..."],
+      ["提出中心观点", "There are several practical ways to..."],
+      ["引出两个方面", "...can take effective measures in two main aspects."],
+      ["提出第一观点", "First and foremost, ..."],
+      ["从两方面展开", "On the one hand, ... On the other hand, ..."],
+      ["补充第二要点", "Moreover, ..."],
+      ["引出例子", "For example, ..."],
+      ["提出学校措施", "The university should..."],
+      ["提出有效方法", "One effective way is to..."],
+      ["说明直接结果", "This would significantly..."],
+      ["连接动作与结果", "..., thereby enhancing..."],
+      ["强调同等重要", "...is equally vital."],
+      ["评价可行条件", "With proper guidance and support, ..."],
+      ["总结全文", "In conclusion, ..."],
+      ["说明手段与结果", "By + V-ing, universities can..."],
+      ["表达最终目标", "...can foster a more supportive environment."],
+    ];
+
+    const questions = [
+      {
+        source: "First and foremost, upgrading digital services on campus is a practical solution.",
+        target: "改成 Student Union",
+        answer: "First and foremost, organizing more meaningful student activities is a practical solution.",
+        topic: ["student union", "student activities"],
+        frame: ["first and foremost", "practical solution"]
+      },
+      {
+        source: "Secondly, improving infrastructure is equally vital.",
+        target: "改成 Campus Resources",
+        answer: "Secondly, making better use of campus resources is equally vital.",
+        topic: ["campus resources", "academic support", "learning resources"],
+        frame: ["secondly", "equally vital"]
+      },
+      {
+        source: "By modernizing school facilities and utilizing smart technology, universities can make campus life easier.",
+        target: "改成 Academic Writing",
+        answer: "By providing practical training and timely feedback, universities can help students develop academic writing skills.",
+        topic: ["academic writing", "writing skills"],
+        frame: ["by", "universities can"]
+      },
+      {
+        source: "For example, students can use one application to access different campus services.",
+        target: "改成 Student Union",
+        answer: "For example, the student union can conduct regular surveys to collect students' opinions and needs.",
+        topic: ["student union"],
+        frame: ["for example"]
+      },
+      {
+        source: "This would broaden students' access to information and improve study efficiency.",
+        target: "改成 Research Project",
+        answer: "This would help students develop research skills and improve problem-solving abilities.",
+        topic: ["research"],
+        frame: ["this would"]
+      },
+      {
+        source: "In conclusion, making full use of campus resources can greatly support students' academic development.",
+        target: "改成 Robots on Campus",
+        answer: "In conclusion, using robots on campus can make college life more efficient and convenient.",
+        topic: ["robot"],
+        frame: ["in conclusion"]
+      }
+    ];
+
+    const expressionOrder = [12, 4, 17, 1, 15, 7, 19, 10, 2, 8, 14, 5, 18, 0, 16, 11, 6, 13, 3, 9];
+    const functionsEl = document.querySelector("#functions");
+    const expressionsEl = document.querySelector("#expressions");
+    const boardEl = document.querySelector("#match-board");
+    const linesEl = document.querySelector("#lines");
+    let selectedFunction = null;
+    let matched = new Set();
+    let solvedSentences = new Set();
+
+    function button(text, id, kind) {
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = `match-item ${kind}`;
+      el.dataset.id = id;
+      el.textContent = text;
+      return el;
+    }
+
+    pairs.forEach(([label], id) => functionsEl.append(button(label, id, "function")));
+    expressionOrder.forEach(id => expressionsEl.append(button(pairs[id][1], id, "expression")));
+
+    functionsEl.addEventListener("click", event => {
+      const item = event.target.closest(".match-item:not(:disabled)");
+      if (!item) return;
+      document.querySelectorAll(".function.selected").forEach(el => el.classList.remove("selected"));
+      item.classList.add("selected");
+      selectedFunction = Number(item.dataset.id);
+      setMatchMessage("现在选择右侧对应的英文表达。", false);
+    });
+
+    expressionsEl.addEventListener("click", event => {
+      const item = event.target.closest(".match-item:not(:disabled)");
+      if (!item) return;
+      if (selectedFunction === null) {
+        setMatchMessage("请先选择左侧的写作功能。", true);
+        return;
+      }
+      const chosenId = Number(item.dataset.id);
+      if (chosenId === selectedFunction) {
+        const left = document.querySelector(`.function[data-id="${chosenId}"]`);
+        [left, item].forEach(el => { el.classList.remove("selected"); el.classList.add("matched"); el.disabled = true; });
+        matched.add(chosenId);
+        selectedFunction = null;
+        updateProgress();
+        drawLines();
+        setMatchMessage(matched.size === pairs.length ? "太棒了，20 组表达已全部匹配！" : "匹配正确！继续下一组。", false);
+      } else {
+        item.classList.remove("wrong");
+        void item.offsetWidth;
+        item.classList.add("wrong");
+        setMatchMessage("还不是这一项，再看看表达的写作功能。", true);
+      }
+    });
+
+    function setMatchMessage(text, bad) {
+      const el = document.querySelector("#match-message");
+      el.textContent = text;
+      el.style.color = bad ? "#b84f58" : "";
+    }
+
+    function drawLines() {
+      linesEl.innerHTML = "";
+      const board = boardEl.getBoundingClientRect();
+      linesEl.setAttribute("viewBox", `0 0 ${board.width} ${board.height}`);
+      matched.forEach(id => {
+        const a = document.querySelector(`.function[data-id="${id}"]`).getBoundingClientRect();
+        const b = document.querySelector(`.expression[data-id="${id}"]`).getBoundingClientRect();
+        const x1 = a.right - board.left, y1 = a.top + a.height / 2 - board.top;
+        const x2 = b.left - board.left, y2 = b.top + b.height / 2 - board.top;
+        const bend = Math.max(12, (x2 - x1) * .45);
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`);
+        linesEl.append(path);
+      });
+    }
+
+    function normalize(text) {
+      return text.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+    }
+
+    const practiceEl = document.querySelector("#practice-list");
+    questions.forEach((q, index) => {
+      const article = document.createElement("article");
+      article.className = "question";
+      article.dataset.index = index;
+      article.innerHTML = `
+        <div class="q-top"><span class="q-number">${index + 1}</span><span class="target">${q.target}</span></div>
+        <p class="source">${q.source}</p>
+        <div class="answer-row">
+          <input class="answer" type="text" aria-label="第 ${index + 1} 题答案" placeholder="在这里输入完整英文句子" autocomplete="off">
+          <button class="check" type="button">检查答案</button>
+        </div>
+        <div class="feedback" aria-live="polite"></div>`;
+      practiceEl.append(article);
+    });
+
+    practiceEl.addEventListener("click", event => {
+      const check = event.target.closest(".check");
+      if (!check) return;
+      validate(check.closest(".question"));
+    });
+    practiceEl.addEventListener("keydown", event => {
+      if (event.key === "Enter" && event.target.matches(".answer")) validate(event.target.closest(".question"));
+    });
+    practiceEl.addEventListener("input", event => {
+      if (!event.target.matches(".answer")) return;
+      const questionEl = event.target.closest(".question");
+      const index = Number(questionEl.dataset.index);
+      if (!solvedSentences.delete(index)) return;
+      questionEl.classList.remove("correct");
+      questionEl.querySelector(".check").textContent = "检查答案";
+      updateProgress();
+    });
+
+    function grammarTips(value, index) {
+      const text = value.toLowerCase().replace(/\s+/g, " ").trim();
+      const tips = [];
+      if (/\b(upgrading|improving) student union\b/.test(text))
+        tips.push("“student union”在这里通常需要限定词 the；也可用 organizing student activities 表达“组织学生活动”。");
+      if (/\b(?:resources|robots|skills|services|activities|students) is\b/.test(text))
+        tips.push("复数主语后应使用 are，而不是 is。");
+      if (/\bstudent union (?:are|were)\b/.test(text))
+        tips.push("student union 是单数，谓语应使用 is 或 was。");
+      if (/\b(?:can|could|would|should)\s+[a-z]+(?:ing|ed)\b/.test(text))
+        tips.push("情态动词 can / could / would / should 后应使用动词原形。");
+      if (/\b([a-z]+)\s+\1\b/.test(text))
+        tips.push("句中有重复单词，请删去一处。");
+      if (index === 3 && /for example[,. ]+student union\b/.test(text))
+        tips.push("student union 作主语时通常写作 the student union。");
+      return tips;
+    }
+
+    function showFeedback(el, passed, message, tips, reference) {
+      el.innerHTML = "";
+      const status = document.createElement("p");
+      status.className = passed ? "good" : "bad";
+      status.textContent = message;
+      el.append(status);
+      if (passed) {
+        const grammar = document.createElement("p");
+        grammar.className = tips.length ? "bad" : "good";
+        grammar.textContent = tips.length ? `语法提示：${tips.join(" ")}` : "基础语法检查：未发现明显问题。";
+        el.append(grammar);
+      }
+      const sample = document.createElement("p");
+      sample.className = "reference";
+      const label = document.createElement("strong");
+      label.textContent = "参考替换句：";
+      sample.append(label, document.createTextNode(reference));
+      el.append(sample);
+    }
+
+    function validate(questionEl) {
+      const index = Number(questionEl.dataset.index);
+      const input = questionEl.querySelector(".answer");
+      const feedback = questionEl.querySelector(".feedback");
+      const value = input.value.trim();
+      const q = questions[index];
+      const compact = normalize(value);
+      const topicOk = q.topic.some(phrase => compact.includes(normalize(phrase)));
+      const frameOk = q.frame.every(phrase => compact.includes(normalize(phrase)));
+      const completeEnough = compact.length >= Math.floor(normalize(q.answer).length * .5);
+      if (!value) {
+        solvedSentences.delete(index);
+        questionEl.classList.remove("correct");
+        feedback.innerHTML = '<p class="bad">请先写出完整句子。</p>';
+      } else if (topicOk && frameOk && completeEnough) {
+        solvedSentences.add(index);
+        questionEl.classList.add("correct");
+        questionEl.querySelector(".check").textContent = "重新检查";
+        showFeedback(feedback, true, "已完成：主题替换正确，且保留了原句的功能框架。", grammarTips(value, index), q.answer);
+      } else {
+        solvedSentences.delete(index);
+        questionEl.classList.remove("correct");
+        questionEl.querySelector(".check").textContent = "检查答案";
+        const missing = !topicOk ? "请明确写出指定主题" : !frameOk ? "请保留原句的功能框架" : "请把表达补充成完整句子";
+        showFeedback(feedback, false, `暂未完成：${missing}。`, [], q.answer);
+      }
+      updateProgress();
+    }
+
+    function updateProgress() {
+      document.querySelector("#match-progress").textContent = `${matched.size} / ${pairs.length}`;
+      document.querySelector("#sentence-progress").textContent = `${solvedSentences.size} / ${questions.length}`;
+      document.querySelector("#total-score").textContent = `${matched.size + solvedSentences.size} / ${pairs.length + questions.length}`;
+      document.querySelector("#complete-message").textContent = matched.size === pairs.length && solvedSentences.size === questions.length
+        ? "全部完成！你已经掌握了“功能框架 → 内容替换”的方法。" : "";
+    }
+
+    document.querySelector("#reset-match").addEventListener("click", () => {
+      matched.clear();
+      selectedFunction = null;
+      document.querySelectorAll(".match-item").forEach(el => { el.disabled = false; el.classList.remove("matched", "selected", "wrong"); });
+      drawLines(); updateProgress(); setMatchMessage("请选择左侧一项开始。", false);
+    });
+    document.querySelector("#reset-sentences").addEventListener("click", () => {
+      solvedSentences.clear();
+      document.querySelectorAll(".question").forEach(el => {
+        el.classList.remove("correct");
+        const input = el.querySelector(".answer"); input.value = "";
+        const check = el.querySelector(".check"); check.textContent = "检查答案";
+        el.querySelector(".feedback").textContent = "";
+      });
+      updateProgress();
+    });
+
+    window.addEventListener("resize", drawLines);
+    console.assert(pairs.length === 20 && questions.length === 6, "Exercise count mismatch");
+    console.assert(normalize(" First, A-B! ") === normalize("firstab"), "Normalization rule failed");
+    console.assert(questions[0].topic.some(phrase => normalize("First and foremost, upgrading student union on campus is a practical solution.").includes(normalize(phrase))), "Flexible topic check failed");
+  </script>
+</body>
+</html>
